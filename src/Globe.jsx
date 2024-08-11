@@ -12,23 +12,33 @@ const points = [
 
 ];
 
-
 const flightPaths = [
     {
-        id: 'flight1',
-        path: [
-            { lat: 37.7749, lon: -122.4194 },
-            { lat: 40.7128, lon: -74.0060 }
-        ]
+        start: { lat: 37.7749, lon: -122.4194 }, // San Francisco, CA
+        end: { lat: 40.7128, lon: -74.0060 }    // New York, NY
     },
     {
-        id: 'flight2',
-        path: [
-            { lat: 34.0522, lon: -118.2437 },
-            { lat: 51.5074, lon: -0.1278 }
-        ]
+        start: { lat: 34.0522, lon: -118.2437 }, // Los Angeles, CA
+        end: { lat: 51.5074, lon: -0.1278 }      // London, UK
     }
 ];
+
+// const flightPaths = [
+//     {
+//         id: 'flight1',
+//         path: [
+//             { lat: 37.7749, lon: -122.4194 },
+//             { lat: 40.7128, lon: -74.0060 }
+//         ]
+//     },
+//     {
+//         id: 'flight2',
+//         path: [
+//             { lat: 34.0522, lon: -118.2437 },
+//             { lat: 51.5074, lon: -0.1278 }
+//         ]
+//     }
+// ];
 
 const Globe = () => {
     const ref = useRef();
@@ -56,39 +66,67 @@ const Globe = () => {
         return new Vector3(x, y, z);
     }
 
+
+    const makeCurvedPath = (start, end, segments = 50) => {
+        const startPos = latLonToXYZ(start.lat, start.lon, 1.22);
+        const endPos = latLonToXYZ(end.lat, end.lon, 1.22);
+
+        const curvePoints = [];
+
+        for (let i = 0; i <= segments; i++) {
+            const t = i / segments; // normalizes within 0  to 1
+
+            const interpolated = new Vector3().lerpVectors(startPos, endPos, t); //linear interpolation - create evenly spaced points between startpos and endpos
+
+            // Using sin because it's symmetric around pi/2. Math.sin(0) is 0 and Math.sin(pi) is 0. So curve starts and ends at the same level
+            const height = Math.sin(Math.PI * t) * 0.1;
+            // Making sure the points are normalized and then scaled to stay at the right distance from globe center.
+            interpolated.normalize().multiplyScalar(1.22 + height);
+            curvePoints.push(interpolated);
+
+        }
+        return curvePoints;
+    }
+
     return (
         <mesh ref={ref} >
             <OrbitControls />
             <sphereGeometry args={[1.20, 32, 32]} />
             <meshStandardMaterial map={texture} bumpMap={bump} bumpScale={0.5} />
 
-            {flightPaths.map((flight) => {
-                const pathPoints = flight.path.map(point => latLonToXYZ(point.lat, point.lon, 1.22));
+            {flightPaths.map((flight, index) => {
+                // const pathPoints = flight.path.map(point => latLonToXYZ(point.lat, point.lon, 1.22));
+                const pathPoints = makeCurvedPath(flight.start, flight.end);
                 return (
-                    <group key={flight.id}>
+                    <group key={index}>
+                        <mesh position={latLonToXYZ(flight.start.lat, flight.start.lon, 1.22)}>
+                            <sphereGeometry args={[0.02, 16, 16]} />
+                            <meshStandardMaterial color="red" />
+                        </mesh>
+
+                        <mesh position={latLonToXYZ(flight.end.lat, flight.end.lon, 1.22)}>
+                            <sphereGeometry args={[0.02, 16, 16]} />
+                            <meshStandardMaterial color="red" />
+                        </mesh>
+
                         <Line
                             points={pathPoints}
                             color="yellow"
                             lineWidth={2}
                             dashed={false} />
-                        {flight.path.map((point, index) => {
-                            const position = pathPoints[index];
-                            return (
-                                <group key={index} position={position}>
-                                    <mesh>
-                                        <sphereGeometry args={[0.02, 16, 16]} />
-                                        <meshStandardMaterial color="red" />
-                                    </mesh>
-                                    <Text position={[0,0.05,0]}
-                                    fontSize={0.02}
-                                    color="white"
-                                    anchorX = "right"
-                                    anchorY = "middle"
-                                    >   {`(${point.lat}, ${point.lon})`}</Text>
+                        <Text position={pathPoints[0].clone().add(new Vector3(0, 0.05, 0))}
+                            fontSize={0.02}
+                            color="white"
+                            anchorX="center"
+                            anchorY="middle"
+                        >{`${flight.start.lat},${flight.start.lon} `}</Text>
+                        <Text position={pathPoints[pathPoints.length - 1].clone().add(new Vector3(0, 0.05, 0))}
+                            fontSize={0.02}
+                            color="white"
+                            anchorX="center"
+                            anchorY="middle"
+                        >{`${flight.end.lat},${flight.end.lon} `}</Text>
 
-                                </group>
-                            )
-                        })}
                     </group>
                 )
             })}
