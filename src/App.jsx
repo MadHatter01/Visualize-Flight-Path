@@ -3,6 +3,7 @@ import './App.css'
 import Globe from './Globe'
 import { Canvas } from '@react-three/fiber'
 import { Stars } from '@react-three/drei'
+import DataLoader from './DataLoader'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -16,7 +17,13 @@ function App() {
       <ambientLight intensity={0.5} />
 
       <directionalLight position={[5, 5, 5]} intensity={1} />
-      <Globe />
+     
+      <DataLoader>
+        {({flightRoutes,airports})=>(
+          <Globe flightRoutes={flightRoutes} airports={airports} />
+        )}
+
+      </DataLoader>
       <Stars />
     </Canvas>
 

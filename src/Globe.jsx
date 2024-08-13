@@ -40,15 +40,18 @@ const flightPaths = [
 //     }
 // ];
 
-const Globe = () => {
+const Globe = ({flightRoutes, airports}) => {
+
     const ref = useRef();
     const texture = useLoader(TextureLoader, '/earth_texture.jpg');
     const bump = useLoader(TextureLoader, 'earth_bump.jpg')
 
-    // useFrame(() => {
-    //     ref.current.rotation.y += 0.001;
-    // })
+    const getCoordinatesByIATA=(code)=>{
+        const airport = airports.find(airport=>airport.iata === code);
+        return airport ? {lat:parseFloat(airport.lat), lon:parseFloat(airport.lon)} : 'no data';
+    }
 
+    console.log(getCoordinatesByIATA(flightRoutes[0].Source_Airport)) //test
     const latLonToXYZ = (lat, lon, radius) => {
 
         // Phi is lat and theta is for lon. Phi will be measured from top to down - so 0 degrees at north pole to 90 to equator and 180 at south pole
@@ -90,6 +93,7 @@ const Globe = () => {
 
     return (
         <mesh ref={ref} >
+        
             <OrbitControls />
             <sphereGeometry args={[1.20, 32, 32]} />
             <meshStandardMaterial map={texture} bumpMap={bump} bumpScale={0.5} />
