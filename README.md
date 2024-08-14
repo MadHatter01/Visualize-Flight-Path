@@ -1,8 +1,6 @@
-# React + Vite
+# Visualize Flight trajectory around the globe
+(in progress)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A little GIS knowledge and React to create this recipe
+![image](https://github.com/user-attachments/assets/1905e9c4-31e1-4cb9-a19c-615789948704)
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
