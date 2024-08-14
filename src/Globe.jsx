@@ -1,6 +1,6 @@
 import { Line, OrbitControls, Text } from '@react-three/drei';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber'
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { TextureLoader, Vector3 } from 'three';
 
 
@@ -51,7 +51,12 @@ const Globe = ({flightRoutes, airports}) => {
         return airport ? {lat:parseFloat(airport.lat), lon:parseFloat(airport.lon)} : 'no data';
     }
 
-    console.log(getCoordinatesByIATA(flightRoutes[0].Source_Airport)) //test
+
+    useEffect(()=>{
+        if (flightRoutes.length > 0 && airports.length > 0) {
+        console.log(getCoordinatesByIATA(flightRoutes[0].Source_Airport)) //test
+        }
+    },[airports,flightRoutes])
     const latLonToXYZ = (lat, lon, radius) => {
 
         // Phi is lat and theta is for lon. Phi will be measured from top to down - so 0 degrees at north pole to 90 to equator and 180 at south pole
