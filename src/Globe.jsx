@@ -1,6 +1,6 @@
 import { Line, OrbitControls, Text } from '@react-three/drei';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { TextureLoader, Vector3 } from 'three';
 
 
@@ -41,6 +41,8 @@ const flightPaths = [
 // ];
 
 const Globe = ({flightRoutes, airports}) => {
+    
+    const [flights, setFlights] = useState([]);
 
     const ref = useRef();
     const texture = useLoader(TextureLoader, '/earth_texture.jpg');
@@ -51,12 +53,6 @@ const Globe = ({flightRoutes, airports}) => {
         return airport ? {lat:parseFloat(airport.lat), lon:parseFloat(airport.lon)} : 'no data';
     }
 
-
-    useEffect(()=>{
-        if (flightRoutes.length > 0 && airports.length > 0) {
-        console.log(getCoordinatesByIATA(flightRoutes[0].Source_Airport)) //test
-        }
-    },[airports,flightRoutes])
     const latLonToXYZ = (lat, lon, radius) => {
 
         // Phi is lat and theta is for lon. Phi will be measured from top to down - so 0 degrees at north pole to 90 to equator and 180 at south pole
@@ -96,18 +92,52 @@ const Globe = ({flightRoutes, airports}) => {
         return curvePoints;
     }
 
+    useEffect(()=>{
+        if (flightRoutes.length > 0 && airports.length > 0) {
+            const paths = flightRoutes.map(route=>{
+                const sourceCoords = getCoordinatesByIATA(route.Source_Airport);
+                const destCoords = getCoordinatesByIATA(route.Destination_Code);
+                if(sourceCoords && destCoords){
+                    return {
+                        path:makeCurvedPath(sourceCoords, destCoords),
+                        source:sourceCoords,
+                        destination:destCoords
+                    }
+                }
+
+            })
+
+                setFlights(paths);    
+ 
+        }
+    },[airports,flightRoutes])
+
+
+
     return (
         <mesh ref={ref} >
-        
+     
             <OrbitControls />
             <sphereGeometry args={[1.20, 32, 32]} />
             <meshStandardMaterial map={texture} bumpMap={bump} bumpScale={0.5} />
-
+            {console.log(flights[1066].source) //test
+            }
+            { flights.length > 0 && (
+                <mesh position={latLonToXYZ(flights[1066].source.lat, flights[1066].source.lon, 1.22)}>
+                    <sphereGeometry args={[0.02, 16, 16]} />
+                    <meshStandardMaterial color="red" />
+                </mesh>
+            )}
+ 
             {flightPaths.map((flight, index) => {
                 // const pathPoints = flight.path.map(point => latLonToXYZ(point.lat, point.lon, 1.22));
                 const pathPoints = makeCurvedPath(flight.start, flight.end);
                 return (
                     <group key={index}>
+                      
+
+
+
                         <mesh position={latLonToXYZ(flight.start.lat, flight.start.lon, 1.22)}>
                             <sphereGeometry args={[0.02, 16, 16]} />
                             <meshStandardMaterial color="red" />
