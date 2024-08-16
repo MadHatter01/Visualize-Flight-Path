@@ -107,7 +107,7 @@ const Globe = ({flightRoutes, airports}) => {
 
             })
 
-                setFlights(paths);    
+                setFlights(paths.slice(1,50));    
  
         }
     },[airports,flightRoutes])
@@ -120,14 +120,21 @@ const Globe = ({flightRoutes, airports}) => {
             <OrbitControls />
             <sphereGeometry args={[1.20, 32, 32]} />
             <meshStandardMaterial map={texture} bumpMap={bump} bumpScale={0.5} />
-            {console.log(flights[1066].source) //test
-            }
-            { flights.length > 0 && (
-                <mesh position={latLonToXYZ(flights[1066].source.lat, flights[1066].source.lon, 1.22)}>
-                    <sphereGeometry args={[0.02, 16, 16]} />
+            
+            { flights.map((flight, index)=>{
+              return(  <group key={index}>
+                    <mesh position={latLonToXYZ(flight.source.lat, flight.source.lon, 1.22)}>
+                    <sphereGeometry args={[0.01, 16, 16]} />
+                    <meshStandardMaterial color="red" />
+                    </mesh>
+                    <mesh position={latLonToXYZ(flight.destination.lat, flight.destination.lon, 1.22)}>
+                    <sphereGeometry args={[0.01, 16, 16]} />
                     <meshStandardMaterial color="red" />
                 </mesh>
-            )}
+                </group>)
+            }) }
+             
+            
  
             {flightPaths.map((flight, index) => {
                 // const pathPoints = flight.path.map(point => latLonToXYZ(point.lat, point.lon, 1.22));
