@@ -122,7 +122,13 @@ const Globe = ({flightRoutes, airports}) => {
             <meshStandardMaterial map={texture} bumpMap={bump} bumpScale={0.5} />
             
             { flights.map((flight, index)=>{
+
               return(  <group key={index}>
+                <Line
+                            points={flight.path}
+                            color="yellow"
+                            lineWidth={2}
+                            dashed={false} />
                     <mesh position={latLonToXYZ(flight.source.lat, flight.source.lon, 1.22)}>
                     <sphereGeometry args={[0.01, 16, 16]} />
                     <meshStandardMaterial color="red" />

@@ -20,6 +20,7 @@ function App() {
      
       <DataLoader>
         {({flightRoutes,airports})=>(
+         
           <Globe flightRoutes={flightRoutes} airports={airports} />
         )}
 
